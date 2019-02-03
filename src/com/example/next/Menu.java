@@ -1,64 +1,51 @@
 package com.example.next;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Scanner;
-
 class Menu {
-    private ArrayList<Task> tasks;
-    private ArrayList<Task> doneTasks;
-    private Scanner scanner;
-    private Task task;
+    //    контроллер тасок
+    private UserInputHandler scanner;
+    private TaskController taskController;
     private DBcon connection;
 
-    Menu() throws SQLException {
-        this.doneTasks = new ArrayList<>();
-        this.tasks = new ArrayList<>();
-        this.scanner = new Scanner(System.in);
+    Menu() {
+        this.scanner = new UserInputHandler();
         this.connection = new DBcon();
-        this.task = new Task(this.connection);
+        this.taskController = new TaskController(this.connection);
     }
 
-    void run(){
-        while (true){
-            int option = showSelf();
+    public void run() {
+        while (true) {
+            int option = showMenu();
 
-            if (option==0)
-                continue;
-            if (option==6)
+            if (option == 6)
                 break;
 
-            switch (option){
+            switch (option) {
+                case 0:
+                    continue;
                 case 1:
-                    this.task.showPendingTasks();
+                    this.taskController.createTask();
                     break;
                 case 2:
-                    this.showDoneTasks();
+                    this.taskController.showPendingTasks();
                     break;
                 case 3:
-                    this.createTask();
+                    this.taskController.showDoneTasks();
                     break;
                 case 4:
-                    int result = this.markTaskDone();
-                    if (result == 0){
-                        System.out.println("You've entered wrong value for the task number, it doesn't exist in the tasks");
-                    }
+                    this.taskController.markTaskDone();
                     break;
                 case 5:
-                    result = this.deleteTask();
-                    if (result == 0){
-                        System.out.println("You've entered wrong value for the deleting, it doesn't exist in the tasks");
-                    }
+                    this.taskController.deleteTask();
                     break;
             }
         }
         System.out.println("Thanks for using!");
     }
 
-    private int showSelf(){
-        System.out.println("Following options: 1 - show pending tasks, 2 - show done tasks, 3 - create task, " +
-                "4 - mark task as done, 5 - delete task for pending, 6 - exit");
-        int choice = this.scanner.nextInt();
+    private int showMenu() {
+        System.out.println("Following options: 1 - create task, 2 - show pending tasks, 3 - show done tasks, " +
+                "4 - mark task as done, 5 - delete task from pending, 6 - exit");
+        int choice = this.scanner.getInt();
         int[] possibleChoices = {1, 2, 3, 4, 5, 6};
         boolean contains = false;
 
@@ -71,57 +58,5 @@ class Menu {
         if (!contains)
             return 0;
         return choice;
-    }
-
-    private void showPendingTasks(){
-        System.out.println("These are tasks that are to be done:");
-        for (Task task: this.tasks){
-            task.showSelf();
-        }
-    }
-
-    private void showDoneTasks(){
-        System.out.println("These are the tasks that you already done:");
-        for (Task task: this.doneTasks){
-            task.showSelf();
-        }
-    }
-
-    private void createTask(){
-        System.out.println("Print the text for the task");
-        this.scanner.nextLine();
-        String text = this.scanner.nextLine();
-
-        this.task.createTask(text);
-        System.out.println("Task is created");
-    }
-
-    private int markTaskDone(){
-        System.out.println("Enter the number of the task to be mark as done");
-        int choice = this.scanner.nextInt() - 1;
-        if (choice >= this.tasks.size()){
-            return 0;
-        }
-
-        Task t = this.tasks.get(choice);
-        t.isDone = true;
-        this.tasks.remove(choice);
-        this.doneTasks.add(t);
-
-        System.out.println("Task is marked as done!");
-        return 1;
-    }
-
-    private int deleteTask(){
-        System.out.println("Enter the number of the task to be deleted");
-        int choice = this.scanner.nextInt() - 1;
-
-        if (choice >= this.tasks.size()){
-            return 0;
-        }
-
-        this.tasks.remove(choice);
-        System.out.println("Task is deleted from the pending list");
-        return 1;
     }
 }

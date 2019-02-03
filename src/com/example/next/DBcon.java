@@ -3,46 +3,67 @@ package com.example.next;
 import java.sql.*;
 
 public class DBcon {
+//    соединение к бд + выполнение запросов
     private Connection connection;
     private Statement statement;
-    private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
 
-    DBcon() throws SQLException{
-        this.connection = DriverManager.getConnection
-                ("jdbc:mariadb://localhost:3306/java", "dev", "eeyore_api");
-        createTables();
-    }
-
-    private void createTables() throws SQLException{
-        String sql = " create table if not exists tasks (id integer auto_increment, " +
-                "name varchar(100), is_done tinyint, primary key(id))";
-        statement.execute(sql);
-    }
-
-    void addTask(String name) throws SQLException{
+    public DBcon(){
         try{
-            preparedStatement = this.connection.prepareStatement("insert into tasks (name, is_done) values (?, 0);");
-            preparedStatement.setString(1, name);
-            preparedStatement.executeUpdate();
+            this.connection = DriverManager.getConnection
+                    ("jdbc:mariadb://localhost:3306/java", "dev", "eeyore_api");
+            createTables();
+            System.out.println("tables created");
         } catch (SQLException e){
             System.out.println(e);
         }
     }
 
-    void markTaskDone(Integer id){
-
+    private void createTables(){
+        try{
+            String sql = " create table if not exists tasks (id integer auto_increment, " +
+                    "name varchar(100), is_done tinyint, primary key(id))";
+            this.statement = this.connection.createStatement();
+            this.statement.execute(sql);
+        } catch (SQLException e){
+            System.out.println(e);
+        }
     }
 
-    ResultSet getDoneTasks() throws SQLException{
-        ResultSet result = statement.executeQuery("select * from tasks where is_done = 1");
+    public PreparedStatement createQuery(String text){
+        PreparedStatement query = null;
+        try {
+            query = this.connection.prepareStatement(text);
+        } catch (SQLException e){
+            System.out.println(e);
+        }
+        return query;
+    }
+
+    public Statement createStatement(){
+        Statement query = null;
+        try {
+            query = this.connection.createStatement();
+        } catch (SQLException e){
+            System.out.println(e);
+        }
+        return query;
+    }
+
+    ResultSet getDoneTasks(){
+        ResultSet result = null;
+        try{
+            result = statement.executeQuery("select * from tasks where is_done = 1");
+        } catch (SQLException e){
+            System.out.println(e);
+        }
         return result;
     }
 
-    ResultSet getPendingTasks() throws SQLException{
-        ResultSet result = statement.executeQuery("select * from tasks where is_done = 0");
-        return result;
-    }
+//    ResultSet getPendingTasks(){
+//        ResultSet result = statement.executeQuery("select * from tasks where is_done = 0");
+//        return result;
+//    }
 
     void deleteTask(){}
 
