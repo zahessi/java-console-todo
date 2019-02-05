@@ -20,7 +20,8 @@ class Task {
                 query.executeUpdate();
             } else
                 System.out.println("An error occurred");
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             System.out.println(e);
         }
     }
